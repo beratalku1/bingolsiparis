@@ -59,32 +59,11 @@ function updateCart() {
 }
 
 function showOrderForm() {
-    new bootstrap.Modal(document.getElementById('orderModal')).show();
-}
+    // Hafızadaki eski bilgileri getir ve kutucuklara yaz
+    const savedName = localStorage.getItem('bingol_user_name');
+    const savedPhone = localStorage.getItem('bingol_user_phone');
+    const savedAddress = localStorage.getItem('bingol_user_address');
 
-function sendWhatsApp() {
-    const name = document.getElementById('cust-name').value;
-    const phone = document.getElementById('cust-phone').value;
-    const address = document.getElementById('cust-address').value;
-    const note = document.getElementById('cust-note').value;
-
-    if(!name || !address || !phone) {
-        alert("Lütfen tüm alanları doldurun!");
-        return;
-    }
-
-    let message = `*BİNGÖLLÜ DÖNER - YENİ SİPARİŞ*\n`;
-    message += `--------------------------\n`;
-    cart.forEach(item => {
-        message += `• ${item.name} - ${item.price} TL\n`;
-    });
-    message += `--------------------------\n`;
-    message += `*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n\n`;
-    message += `*MÜŞTERİ:* ${name}\n`;
-    message += `*TELEFON:* ${phone}\n`;
-    message += `*ADRES:* ${address}\n`;
-    if(note) message += `*NOT:* ${note}`;
-
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, '_blank');
-}
+    if (savedName) document.getElementById('cust-name').value = savedName;
+    if (savedPhone) document.getElementById('cust-phone').value = savedPhone;
+    if (saved
