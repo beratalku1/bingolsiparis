@@ -8,15 +8,19 @@ const SHOPS = {
     tatli: {
         name: "Vangölü Tatlıcısı",
         url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSsAUsKqa8Z4hFgiL6rGGi2na95e71trkX_hRzhm8H4AUubEXIbnJE6k7uwMXOxFR3UoNMveyVObjt2/pub?gid=510928920&single=true&output=csv',
-        number: '905454254212' // Şimdilik aynı numara
+        number: '905454254212'
     }
 };
 
 let currentShop = null;
 let cart = [];
 
-function openShop(shopKey) {
+// Masaüstünde tıklamayı garantiye alan ana fonksiyon
+window.openShop = function(shopKey) {
+    console.log("Dükkan açılıyor:", shopKey); // Hata ayıklama için
     currentShop = SHOPS[shopKey];
+    if (!currentShop) return;
+
     cart = [];
     updateCart();
     
@@ -26,12 +30,12 @@ function openShop(shopKey) {
     document.getElementById('menu-container').innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-warning"></div><p>Menü yükleniyor...</p></div>';
     
     loadMenu(currentShop.url);
-}
+};
 
-function goHome() {
+window.goHome = function() {
     document.getElementById('home-screen').style.display = 'block';
     document.getElementById('menu-screen').style.display = 'none';
-}
+};
 
 async function loadMenu(url) {
     try {
@@ -39,7 +43,7 @@ async function loadMenu(url) {
         const csv = await response.text();
         parseCSV(csv);
     } catch (e) {
-        document.getElementById('menu-container').innerHTML = "Hata: Veri çekilemedi.";
+        document.getElementById('menu-container').innerHTML = "Hata: Veri çekilemedi. Lütfen sayfayı yenileyin.";
     }
 }
 
@@ -52,7 +56,9 @@ function parseCSV(csv) {
         let row = rows[i].trim();
         if (!row) continue;
 
-        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(c => c.replace(/^"|"$/g, '').trim());
+        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+        const cols = row.split(regex).map(c => c.replace(/^"|"$/g, '').trim());
+        
         if (cols.length < 3) continue;
 
         if (cols[0] !== currentCat) {
@@ -62,21 +68,21 @@ function parseCSV(csv) {
 
         html += `
             <div class="product-card d-flex justify-content-between align-items-center">
-                <div>
+                <div style="flex:1">
                     <h6 class="mb-1">${cols[1]}</h6>
                     <small class="text-muted d-block">${cols[3] || ''}</small>
                     <span class="price-tag">${cols[2]} TL</span>
                 </div>
-                <button class="btn btn-add" onclick="addToCart('${cols[1]}', ${cols[2]})">Ekle</button>
+                <button class="btn btn-add" onclick="addToCart('${cols[1].replace(/'/g, "\\'")}', ${cols[2]})">Ekle</button>
             </div>`;
     }
     document.getElementById('menu-container').innerHTML = html;
 }
 
-function addToCart(n, p) {
+window.addToCart = function(n, p) {
     cart.push({name: n, price: p});
     updateCart();
-}
+};
 
 function updateCart() {
     const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
@@ -84,16 +90,22 @@ function updateCart() {
     document.getElementById('cart-footer').style.display = total > 0 ? 'block' : 'none';
 }
 
-function showOrderForm() {
+window.showOrderForm = function() {
     document.getElementById('cust-name').value = localStorage.getItem('u_name') || '';
     document.getElementById('cust-phone').value = localStorage.getItem('u_phone') || '';
     document.getElementById('cust-address').value = localStorage.getItem('u_address') || '';
-    new bootstrap.Modal(document.getElementById('orderModal')).show();
-}
+    
+    var myModal = new bootstrap.Modal(document.getElementById('orderModal'));
+    myModal.show();
+};
 
-function sendWhatsApp() {
-    const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value, a = document.getElementById('cust-address').value, nt = document.getElementById('cust-note').value;
-    if(!n || !a || !p) return alert("Eksikleri doldurun!");
+window.sendWhatsApp = function() {
+    const n = document.getElementById('cust-name').value, 
+          p = document.getElementById('cust-phone').value, 
+          a = document.getElementById('cust-address').value, 
+          nt = document.getElementById('cust-note').value;
+
+    if(!n || !a || !p) return alert("Lütfen tüm alanları doldurun!");
 
     localStorage.setItem('u_name', n);
     localStorage.setItem('u_phone', p);
@@ -101,7 +113,7 @@ function sendWhatsApp() {
 
     let msg = `*${currentShop.name.toUpperCase()} - YENİ SİPARİŞ*\n`;
     cart.forEach(i => msg += `• ${i.name} - ${i.price} TL\n`);
-    msg += `\n*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n*Ad:* ${n}\n*Adres:* ${a}\n*Not:* ${nt}`;
+    msg += `\n*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n*Müşteri:* ${n}\n*Adres:* ${a}\n*Not:* ${nt}`;
     
-    window.open(`https://wa.me/${currentShop.number}?text=${encodeURIComponent(msg)}`);
-}
+    window.open(`https://wa.me/${currentShop.number}?text=${encodeURIComponent(msg)}`, '_blank');
+};
