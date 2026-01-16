@@ -2,15 +2,23 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
 .navbar { background-color: #d35400; color: white; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .navbar-brand { color: white !important; font-weight: bold; }
 
-/* Dükkan Kartları */
+/* Dükkan Kartları - Web'de Tıklamayı Garantiye Alan Ayarlar */
 .shop-card { 
     background: white; 
     border-radius: 15px; 
     border: 1px solid #eee; 
-    cursor: pointer; 
+    cursor: pointer !important; /* Masaüstünde fare imlecini el yapar */
     transition: 0.2s; 
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
 }
-.shop-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.shop-card:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    background-color: #fffaf5; 
+}
 .shop-icon { 
     font-size: 2rem; 
     background: #fff5eb; 
@@ -20,6 +28,7 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     align-items: center; 
     justify-content: center; 
     border-radius: 12px; 
+    pointer-events: none; /* İkonun tıklamayı engellemesini önler */
 }
 
 /* Menü Tasarımı */
@@ -39,7 +48,7 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     border: 1px solid #eee; 
 }
 .price-tag { color: #d35400; font-weight: bold; }
-.btn-add { background-color: #27ae60; color: white; border: none; padding: 5px 20px; border-radius: 20px; font-weight: bold; }
+.btn-add { background-color: #27ae60; color: white; border: none; padding: 5px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
 .cart-footer { 
     position: fixed; 
