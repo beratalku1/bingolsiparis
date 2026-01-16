@@ -5,38 +5,55 @@ const WHATSAPP_NUMBER = '905454254212';
 let cart = [];
 
 // Menüyü Google Sheets'ten Çek
-fetch(SHEET_URL)
-    .then(response => response.text())
-    .then(data => {
+async function getMenu() {
+    try {
+        const response = await fetch(SHEET_URL + '&cache_bust=' + Date.now()); // Önbelleği (cache) kırmak için zaman damgası ekledik
+        const data = await response.text();
+        
         if (!data || data.includes("<!DOCTYPE html>")) {
-            throw new Error("CSV verisi alınamadı.");
+            document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Hata: Google Sheets CSV linki hatalı veya yayınlanmamış.</p>`;
+            return;
         }
+        
         parseCSV(data);
-    })
-    .catch(err => {
+    } catch (err) {
         console.error("Hata:", err);
-        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Menü yüklenirken bir hata oluştu.</p>`;
-    });
+        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Bağlantı hatası oluştu.</p>`;
+    }
+}
 
 function parseCSV(csv) {
-    // Satır içi virgülleri korumak için Regex (Düzenli İfade) kullanıyoruz
     const rows = csv.split(/\r?\n/);
     let html = '';
     let currentCategory = '';
 
     for (let i = 1; i < rows.length; i++) {
-        if (!rows[i].trim()) continue;
+        let row = rows[i].trim();
+        if (!row) continue;
 
-        // Bu özel kod, tırnak içindeki virgülleri görmezden gelir
-        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
-        const columns = rows[i].split(regex).map(col => col.replace(/^"|"$/g, '').trim());
+        // Virgül ve tırnak karmaşasını çözen en sağlam mantık
+        let columns = [];
+        let col = "";
+        let inQuotes = false;
+
+        for (let char of row) {
+            if (char === '"') inQuotes = !inQuotes;
+            else if (char === ',' && !inQuotes) {
+                columns.push(col.trim());
+                col = "";
+            } else {
+                col += char;
+            }
+        }
+        columns.push(col.trim());
 
         if (columns.length < 3) continue;
 
-        const kategori = columns[0];
-        const urunAd = columns[1];
-        const fiyat = columns[2];
-        const aciklama = columns[3] || '';
+        const kategori = columns[0].replace(/"/g, '');
+        const urunAd = columns[1].replace(/"/g, '');
+        const fiyatStr = columns[2].replace(/"/g, '').replace(/[^0-9.]/g, ''); // Sadece rakamları al
+        const fiyat = parseFloat(fiyatStr) || 0;
+        const aciklama = columns[3] ? columns[3].replace(/"/g, '') : '';
 
         // Kategori Başlığı
         if (kategori !== currentCategory) {
@@ -55,7 +72,8 @@ function parseCSV(csv) {
                 <button class="btn btn-add" onclick="addToCart('${urunAd.replace(/'/g, "\\'")}', ${fiyat})">Ekle</button>
             </div>`;
     }
-    document.getElementById('menu-container').innerHTML = html || '<p class="text-center mt-5">Ürün bulunamadı.</p>';
+    
+    document.getElementById('menu-container').innerHTML = html || '<p class="text-center mt-5">Ürün listesi boş görünüyor.</p>';
 }
 
 function addToCart(name, price) {
@@ -83,7 +101,7 @@ function sendWhatsApp() {
     const address = document.getElementById('cust-address').value;
     const note = document.getElementById('cust-note').value;
 
-    if(!name || !address || !phone) return alert("Lütfen eksik alanları doldurun!");
+    if(!name || !address || !phone) return alert("Lütfen tüm alanları doldurun!");
 
     localStorage.setItem('bingol_user_name', name);
     localStorage.setItem('bingol_user_phone', phone);
@@ -97,3 +115,6 @@ function sendWhatsApp() {
 
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 }
+
+// Uygulamayı Başlat
+getMenu();
