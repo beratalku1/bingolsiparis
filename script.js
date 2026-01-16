@@ -9,44 +9,42 @@ fetch(SHEET_URL)
     .then(response => response.text())
     .then(data => {
         if (!data || data.includes("<!DOCTYPE html>")) {
-            throw new Error("CSV verisi alınamadı, linki kontrol edin.");
+            throw new Error("CSV verisi alınamadı.");
         }
         parseCSV(data);
     })
     .catch(err => {
-        console.error("Veri çekilemedi:", err);
-        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Menü yüklenirken bir hata oluştu. Lütfen bağlantıyı kontrol edin.</p>`;
+        console.error("Hata:", err);
+        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Menü yüklenirken bir hata oluştu.</p>`;
     });
 
 function parseCSV(csv) {
-    // Satırları ayır (hem \n hem \r\n destekler)
-    const lines = csv.split(/\r?\n/);
+    // Satır içi virgülleri korumak için Regex (Düzenli İfade) kullanıyoruz
+    const rows = csv.split(/\r?\n/);
     let html = '';
     let currentCategory = '';
 
-    // İlk satırı (başlıklar) atla ve döngüye gir
-    for (let i = 1; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
+    for (let i = 1; i < rows.length; i++) {
+        if (!rows[i].trim()) continue;
 
-        // CSV virgül ile ayrıldığı için parçalara böl
-        // Not: Eğer hücre içinde virgül varsa bu basit ayırıcı sorun çıkarabilir
-        const columns = line.split(',');
-        
+        // Bu özel kod, tırnak içindeki virgülleri görmezden gelir
+        const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+        const columns = rows[i].split(regex).map(col => col.replace(/^"|"$/g, '').trim());
+
         if (columns.length < 3) continue;
 
-        const kategori = columns[0].replace(/"/g, '').trim();
-        const urunAd = columns[1].replace(/"/g, '').trim();
-        const fiyat = columns[2].replace(/"/g, '').trim();
-        const aciklama = columns[3] ? columns[3].replace(/"/g, '').trim() : '';
+        const kategori = columns[0];
+        const urunAd = columns[1];
+        const fiyat = columns[2];
+        const aciklama = columns[3] || '';
 
-        // Kategori Başlığı Oluştur
+        // Kategori Başlığı
         if (kategori !== currentCategory) {
             currentCategory = kategori;
             html += `<h4 class="category-header">${currentCategory}</h4>`;
         }
 
-        // Ürün Kartı Oluştur
+        // Ürün Kartı
         html += `
             <div class="product-card d-flex justify-content-between align-items-center">
                 <div style="flex: 1; padding-right: 10px;">
@@ -54,15 +52,10 @@ function parseCSV(csv) {
                     <p class="small text-muted mb-1">${aciklama}</p>
                     <span class="price-tag">${fiyat} TL</span>
                 </div>
-                <button class="btn btn-add" onclick="addToCart('${urunAd}', ${fiyat})">Ekle</button>
+                <button class="btn btn-add" onclick="addToCart('${urunAd.replace(/'/g, "\\'")}', ${fiyat})">Ekle</button>
             </div>`;
     }
-
-    if (html === '') {
-        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5">Henüz ürün bulunamadı.</p>`;
-    } else {
-        document.getElementById('menu-container').innerHTML = html;
-    }
+    document.getElementById('menu-container').innerHTML = html || '<p class="text-center mt-5">Ürün bulunamadı.</p>';
 }
 
 function addToCart(name, price) {
@@ -77,14 +70,10 @@ function updateCart() {
 }
 
 function showOrderForm() {
-    const savedName = localStorage.getItem('bingol_user_name');
-    const savedPhone = localStorage.getItem('bingol_user_phone');
-    const savedAddress = localStorage.getItem('bingol_user_address');
-
-    if (savedName) document.getElementById('cust-name').value = savedName;
-    if (savedPhone) document.getElementById('cust-phone').value = savedPhone;
-    if (savedAddress) document.getElementById('cust-address').value = savedAddress;
-
+    document.getElementById('cust-name').value = localStorage.getItem('bingol_user_name') || '';
+    document.getElementById('cust-phone').value = localStorage.getItem('bingol_user_phone') || '';
+    document.getElementById('cust-address').value = localStorage.getItem('bingol_user_address') || '';
+    
     new bootstrap.Modal(document.getElementById('orderModal')).show();
 }
 
@@ -94,27 +83,17 @@ function sendWhatsApp() {
     const address = document.getElementById('cust-address').value;
     const note = document.getElementById('cust-note').value;
 
-    if(!name || !address || !phone) {
-        alert("Lütfen tüm alanları doldurun!");
-        return;
-    }
+    if(!name || !address || !phone) return alert("Lütfen eksik alanları doldurun!");
 
     localStorage.setItem('bingol_user_name', name);
     localStorage.setItem('bingol_user_phone', phone);
     localStorage.setItem('bingol_user_address', address);
 
-    let message = `*BİNGÖLLÜ DÖNER - YENİ SİPARİŞ*\n`;
-    message += `--------------------------\n`;
-    cart.forEach(item => {
-        message += `• ${item.name} - ${item.price} TL\n`;
-    });
-    message += `--------------------------\n`;
-    message += `*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n\n`;
-    message += `*MÜŞTERİ:* ${name}\n`;
-    message += `*TELEFON:* ${phone}\n`;
-    message += `*ADRES:* ${address}\n`;
+    let message = `*BİNGÖLLÜ DÖNER - YENİ SİPARİŞ*\n--------------------------\n`;
+    cart.forEach(item => message += `• ${item.name} - ${item.price} TL\n`);
+    message += `--------------------------\n*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n\n`;
+    message += `*MÜŞTERİ:* ${name}\n*TELEFON:* ${phone}\n*ADRES:* ${address}\n`;
     if(note) message += `*NOT:* ${note}`;
 
-    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-    window.open(waUrl, '_blank');
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, '_blank');
 }
