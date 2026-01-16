@@ -8,24 +8,37 @@ let cart = [];
 fetch(SHEET_URL)
     .then(response => response.text())
     .then(data => {
+        if (!data || data.includes("<!DOCTYPE html>")) {
+            throw new Error("CSV verisi alınamadı, linki kontrol edin.");
+        }
         parseCSV(data);
     })
-    .catch(err => console.error("Veri çekilemedi:", err));
+    .catch(err => {
+        console.error("Veri çekilemedi:", err);
+        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5 text-danger">Menü yüklenirken bir hata oluştu. Lütfen bağlantıyı kontrol edin.</p>`;
+    });
 
 function parseCSV(csv) {
-    const lines = csv.split('\n').slice(1);
+    // Satırları ayır (hem \n hem \r\n destekler)
+    const lines = csv.split(/\r?\n/);
     let html = '';
     let currentCategory = '';
 
-    lines.forEach(line => {
-        // Virgül ile ayrılmış verileri temizle
-        const columns = line.split(',');
-        if (columns.length < 3) return;
+    // İlk satırı (başlıklar) atla ve döngüye gir
+    for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
 
-        const kategori = columns[0].trim();
-        const urunAd = columns[1].trim();
-        const fiyat = columns[2].trim();
-        const aciklama = columns[3] ? columns[3].trim() : '';
+        // CSV virgül ile ayrıldığı için parçalara böl
+        // Not: Eğer hücre içinde virgül varsa bu basit ayırıcı sorun çıkarabilir
+        const columns = line.split(',');
+        
+        if (columns.length < 3) continue;
+
+        const kategori = columns[0].replace(/"/g, '').trim();
+        const urunAd = columns[1].replace(/"/g, '').trim();
+        const fiyat = columns[2].replace(/"/g, '').trim();
+        const aciklama = columns[3] ? columns[3].replace(/"/g, '').trim() : '';
 
         // Kategori Başlığı Oluştur
         if (kategori !== currentCategory) {
@@ -43,8 +56,13 @@ function parseCSV(csv) {
                 </div>
                 <button class="btn btn-add" onclick="addToCart('${urunAd}', ${fiyat})">Ekle</button>
             </div>`;
-    });
-    document.getElementById('menu-container').innerHTML = html;
+    }
+
+    if (html === '') {
+        document.getElementById('menu-container').innerHTML = `<p class="text-center mt-5">Henüz ürün bulunamadı.</p>`;
+    } else {
+        document.getElementById('menu-container').innerHTML = html;
+    }
 }
 
 function addToCart(name, price) {
@@ -59,11 +77,44 @@ function updateCart() {
 }
 
 function showOrderForm() {
-    // Hafızadaki eski bilgileri getir ve kutucuklara yaz
     const savedName = localStorage.getItem('bingol_user_name');
     const savedPhone = localStorage.getItem('bingol_user_phone');
     const savedAddress = localStorage.getItem('bingol_user_address');
 
     if (savedName) document.getElementById('cust-name').value = savedName;
     if (savedPhone) document.getElementById('cust-phone').value = savedPhone;
-    if (saved
+    if (savedAddress) document.getElementById('cust-address').value = savedAddress;
+
+    new bootstrap.Modal(document.getElementById('orderModal')).show();
+}
+
+function sendWhatsApp() {
+    const name = document.getElementById('cust-name').value;
+    const phone = document.getElementById('cust-phone').value;
+    const address = document.getElementById('cust-address').value;
+    const note = document.getElementById('cust-note').value;
+
+    if(!name || !address || !phone) {
+        alert("Lütfen tüm alanları doldurun!");
+        return;
+    }
+
+    localStorage.setItem('bingol_user_name', name);
+    localStorage.setItem('bingol_user_phone', phone);
+    localStorage.setItem('bingol_user_address', address);
+
+    let message = `*BİNGÖLLÜ DÖNER - YENİ SİPARİŞ*\n`;
+    message += `--------------------------\n`;
+    cart.forEach(item => {
+        message += `• ${item.name} - ${item.price} TL\n`;
+    });
+    message += `--------------------------\n`;
+    message += `*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n\n`;
+    message += `*MÜŞTERİ:* ${name}\n`;
+    message += `*TELEFON:* ${phone}\n`;
+    message += `*ADRES:* ${address}\n`;
+    if(note) message += `*NOT:* ${note}`;
+
+    const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+}
