@@ -15,13 +15,62 @@ body {
 }
 
 /* Navbar ve genel öğeler için yeni renkler */
+/* Bal Peteği Navbar Tasarımı */
 .navbar { 
-    background-color: var(--primary-color); 
-    color: white; 
-    padding: 15px; 
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    background-color: #d35400; /* Ana renk */
+    background-image: radial-gradient(#f39c12 1px, transparent 1px); /* Petek noktaları */
+    background-size: 20px 20px;
+    position: relative;
+    border-bottom: 3px solid #f39c12;
 }
-.navbar-brand { color: white !important; font-weight: bold; }
+
+/* Gerçek petek dokusu efekti (CSS Pattern) */
+.navbar::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    opacity: 0.2;
+    background: 
+        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(-30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(-30deg, #000 12%, transparent 12.5%, transparent 87%, #000 87.5%, #000),
+        linear-gradient(60deg, #000 25%, transparent 25.5%, transparent 75%, #000 75.5%, #000), 
+        linear-gradient(60deg, #000 25%, transparent 25.5%, transparent 75%, #000 75.5%, #000);
+    background-size: 40px 70px;
+}
+
+/* Arka Plan Elementlerini Çoğaltma ve Canlandırma */
+.bingol-bg-elements {
+    position: fixed; /* Sayfa kaysa da elementler kalsın */
+    width: 100vw;
+    height: 100vh;
+    top: 0; left: 0;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bingol-bg-elements div {
+    position: absolute;
+    opacity: 0.15;
+    animation: float infinite ease-in-out;
+}
+
+/* Farklı yönlere ve hızlara sahip arılar */
+.bee-1 { top: 15%; left: 10%; font-size: 2.5rem; animation-duration: 15s; }
+.bee-2 { top: 40%; right: 5%; font-size: 2rem; animation-duration: 18s; animation-delay: 2s; }
+.bee-3 { bottom: 20%; left: 5%; font-size: 1.8rem; animation-duration: 20s; animation-delay: 4s; }
+
+/* Heybetli kartallar */
+.eagle-1 { top: 5%; right: 15%; font-size: 4rem; animation-duration: 25s; opacity: 0.1 !important; }
+.eagle-2 { bottom: 10%; right: 20%; font-size: 3.5rem; animation-duration: 30s; animation-delay: 7s; }
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    33% { transform: translate(30px, 50px) rotate(10deg); }
+    66% { transform: translate(-20px, 20px) rotate(-10deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
 
 /* Dükkan Kartları - Web'de Tıklamayı Garantiye Alan Ayarlar */
 .shop-card { 
@@ -217,3 +266,4 @@ body {
         animation-duration: 15s; /* Daha hızlı hareket */
     }
 }
+
