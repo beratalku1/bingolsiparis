@@ -23,15 +23,19 @@ window.openShop = function(shopKey) {
     document.getElementById('menu-screen').style.display = 'block';
     document.getElementById('active-shop-name').innerText = currentShop.name;
     
-    // BUTON KONTROLÜ
+    // SON SİPARİŞİ VE İÇERİĞİNİ GÖSTER
     const lastData = localStorage.getItem('last_order_' + shopKey);
     const container = document.getElementById('repeat-order-container');
     
     if (lastData) {
         const parsed = JSON.parse(lastData);
-        container.innerHTML = `<button class="btn btn-light mb-3" onclick="repeatLastOrder('${shopKey}')">
-            🔄 Son Siparişi Tekrarla (${parsed.total} TL)
-        </button>`;
+        // Ürün isimlerini birleştir
+        const itemNames = parsed.items.map(i => i.name).join(", ");
+        container.innerHTML = `
+            <button class="btn btn-light mb-3 text-start w-100 p-3" onclick="repeatLastOrder('${shopKey}')">
+                <strong>🔄 Son Siparişi Tekrarla (${parsed.total} TL)</strong>
+                <span class="last-order-detail">${itemNames}</span>
+            </button>`;
         container.style.display = 'block';
     } else {
         container.style.display = 'none';
@@ -96,8 +100,26 @@ window.addToCart = function(n, p) {
     updateCart();
 };
 
+// YENİ: SEPETTEN SİLME FONKSİYONU
+window.removeFromCart = function(index) {
+    cart.splice(index, 1);
+    updateCart();
+};
+
 function updateCart() {
     const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    const cartList = document.getElementById('cart-items-list');
+    
+    // Sepet listesini temizle ve yeniden oluştur
+    cartList.innerHTML = '';
+    cart.forEach((item, index) => {
+        cartList.innerHTML += `
+            <div class="cart-item">
+                <span>${item.name} (${item.price} TL)</span>
+                <button class="btn-remove" onclick="removeFromCart(${index})">✕</button>
+            </div>`;
+    });
+
     document.getElementById('total-price').innerText = total;
     document.getElementById('cart-footer').style.display = total > 0 ? 'block' : 'none';
 }
@@ -119,7 +141,6 @@ window.sendWhatsApp = function() {
 
     const totalPrice = document.getElementById('total-price').innerText;
 
-    // KAYIT SİSTEMİ
     const shopKey = currentShop.name === "Bingöllü Döner" ? 'doner' : 'tatli';
     const orderData = { items: cart, total: totalPrice };
     localStorage.setItem('last_order_' + shopKey, JSON.stringify(orderData));
