@@ -73,3 +73,27 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     width: 100%;
 }
 
+/* Sepet Listesi Tasarımı */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dashed #eee;
+}
+.btn-remove {
+    color: #e74c3c;
+    cursor: pointer;
+    font-weight: bold;
+    margin-left: 10px;
+    border: none;
+    background: none;
+}
+.last-order-detail {
+    font-size: 0.8rem;
+    display: block;
+    color: #666;
+    margin-top: 5px;
+}
+
+
