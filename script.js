@@ -1,4 +1,3 @@
-// DÜKKAN YAPILANDIRMALARI
 const SHOPS = {
     doner: {
         name: "Bingöllü Döner",
@@ -17,8 +16,6 @@ let cart = [];
 
 window.openShop = function(shopKey) {
     currentShop = SHOPS[shopKey];
-    if (!currentShop) return;
-
     cart = [];
     updateCart();
     
@@ -26,31 +23,29 @@ window.openShop = function(shopKey) {
     document.getElementById('menu-screen').style.display = 'block';
     document.getElementById('active-shop-name').innerText = currentShop.name;
     
-    // Son sipariş butonu kontrolü
-    checkLastOrder();
+    // BUTON KONTROLÜ
+    const lastData = localStorage.getItem('last_order_' + shopKey);
+    const container = document.getElementById('repeat-order-container');
+    
+    if (lastData) {
+        const parsed = JSON.parse(lastData);
+        container.innerHTML = `<button class="btn btn-light mb-3" onclick="repeatLastOrder('${shopKey}')">
+            🔄 Son Siparişi Tekrarla (${parsed.total} TL)
+        </button>`;
+        container.style.display = 'block';
+    } else {
+        container.style.display = 'none';
+    }
 
     loadMenu(currentShop.url);
 };
 
-function checkLastOrder() {
-    const lastOrder = localStorage.getItem(`last_order_${currentShop.name}`);
-    const repeatBtn = document.getElementById('repeat-order-container');
-    if (lastOrder) {
-        repeatBtn.innerHTML = `<button class="btn btn-outline-secondary w-100 mb-3 small" onclick="repeatLastOrder()">
-            🔄 Son Siparişi Tekrarla (${JSON.parse(lastOrder).total} TL)
-        </button>`;
-        repeatBtn.style.display = 'block';
-    } else {
-        repeatBtn.style.display = 'none';
-    }
-}
-
-window.repeatLastOrder = function() {
-    const lastOrder = JSON.parse(localStorage.getItem(`last_order_${currentShop.name}`));
-    if (lastOrder && lastOrder.items) {
-        cart = lastOrder.items;
+window.repeatLastOrder = function(shopKey) {
+    const lastData = JSON.parse(localStorage.getItem('last_order_' + shopKey));
+    if (lastData) {
+        cart = lastData.items;
         updateCart();
-        showOrderForm(); // Direkt formu aç
+        showOrderForm();
     }
 };
 
@@ -65,7 +60,7 @@ async function loadMenu(url) {
         const csv = await response.text();
         parseCSV(csv);
     } catch (e) {
-        document.getElementById('menu-container').innerHTML = "Hata: Veri çekilemedi.";
+        document.getElementById('menu-container').innerHTML = "Menü yüklenemedi.";
     }
 }
 
@@ -120,16 +115,14 @@ window.sendWhatsApp = function() {
           a = document.getElementById('cust-address').value, 
           nt = document.getElementById('cust-note').value;
 
-    if(!n || !a || !p) return alert("Lütfen tüm alanları doldurun!");
+    if(!n || !a || !p) return alert("Eksikleri doldurun!");
 
     const totalPrice = document.getElementById('total-price').innerText;
 
-    // SON SİPARİŞİ KAYDET (Kritik Nokta)
-    const orderData = {
-        items: cart,
-        total: totalPrice
-    };
-    localStorage.setItem(`last_order_${currentShop.name}`, JSON.stringify(orderData));
+    // KAYIT SİSTEMİ
+    const shopKey = currentShop.name === "Bingöllü Döner" ? 'doner' : 'tatli';
+    const orderData = { items: cart, total: totalPrice };
+    localStorage.setItem('last_order_' + shopKey, JSON.stringify(orderData));
 
     localStorage.setItem('u_name', n);
     localStorage.setItem('u_phone', p);
