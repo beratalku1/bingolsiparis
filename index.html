@@ -59,9 +59,13 @@
     </div>
 
     <div id="cart-footer" class="cart-footer">
-        <div class="container d-flex justify-content-between align-items-center">
-            <div><strong>Toplam: <span id="total-price">0</span> TL</strong></div>
-            <button class="btn btn-warning fw-bold" onclick="showOrderForm()">Siparişi Tamamla</button>
+        <div class="container">
+            <div id="cart-items-list" class="mb-3" style="max-height: 150px; overflow-y: auto;"></div>
+            
+            <div class="d-flex justify-content-between align-items-center">
+                <div><strong>Toplam: <span id="total-price">0</span> TL</strong></div>
+                <button class="btn btn-warning fw-bold" onclick="showOrderForm()">Siparişi Tamamla</button>
+            </div>
         </div>
     </div>
 </div>
@@ -90,4 +94,5 @@
 <script src="script.js"></script>
 </body>
 </html>
+
 
