@@ -15,14 +15,20 @@ const SHOPS = {
 let currentShop = null;
 let cart = [];
 
-// SİPARİŞ TİPİ GEÇİŞİ (Masa / Adres)
+// SİPARİŞ TİPİNE GÖRE ALANLARI GİZLE/GÖSTER
 window.toggleOrderInput = function(type) {
+    const addressArea = document.getElementById('address-input-area');
+    const tableArea = document.getElementById('table-input-area');
+    const phoneInput = document.getElementById('cust-phone');
+
     if (type === 'table') {
-        document.getElementById('address-input-area').style.display = 'none';
-        document.getElementById('table-input-area').style.display = 'block';
+        addressArea.style.display = 'none';
+        phoneInput.style.display = 'none'; // Masa siparişinde telefonu gizle
+        tableArea.style.display = 'block';
     } else {
-        document.getElementById('address-input-area').style.display = 'block';
-        document.getElementById('table-input-area').style.display = 'none';
+        addressArea.style.display = 'block';
+        phoneInput.style.display = 'block'; // Adres siparişinde telefonu göster
+        tableArea.style.display = 'none';
     }
 };
 
@@ -35,7 +41,6 @@ window.openShop = function(shopKey) {
     document.getElementById('menu-screen').style.display = 'block';
     document.getElementById('active-shop-name').innerText = currentShop.name;
     
-    // SON SİPARİŞİ VE İÇERİĞİNİ GÖSTER
     const lastData = localStorage.getItem('last_order_' + shopKey);
     const container = document.getElementById('repeat-order-container');
     
@@ -138,7 +143,6 @@ window.showOrderForm = function() {
     document.getElementById('cust-phone').value = localStorage.getItem('u_phone') || '';
     document.getElementById('cust-address').value = localStorage.getItem('u_address') || '';
     
-    // Formu her açılışta varsayılan olarak "Adres" tipine getir
     document.getElementById('typeAddress').checked = true;
     toggleOrderInput('address');
     
@@ -151,7 +155,7 @@ window.sendWhatsApp = function() {
     const nt = document.getElementById('cust-note').value;
     const isTable = document.getElementById('typeTable').checked;
 
-    if(!n || !p) return alert("Lütfen ad ve telefon bilgilerini doldurun!");
+    if(!n) return alert("Lütfen adınızı girin!");
 
     let locationInfo = "";
     if(isTable) {
@@ -160,23 +164,20 @@ window.sendWhatsApp = function() {
         locationInfo = `📍 *MASA NO:* ${tableNo}`;
     } else {
         const address = document.getElementById('cust-address').value;
+        if(!p) return alert("Lütfen telefon numaranızı girin!");
         if(!address) return alert("Lütfen teslimat adresini girin!");
-        locationInfo = `🏠 *ADRES:* ${address}`;
+        locationInfo = `🏠 *ADRES:* ${address}\n📞 *TEL:* ${p}`;
         localStorage.setItem('u_address', address);
+        localStorage.setItem('u_phone', p);
     }
 
     const totalPrice = document.getElementById('total-price').innerText;
     const shopKey = currentShop.name === "Bingöllü Döner" ? 'doner' : 'tatli';
     
-    // Son siparişi kaydet
     const orderData = { items: cart, total: totalPrice };
     localStorage.setItem('last_order_' + shopKey, JSON.stringify(orderData));
-
-    // Müşteri bilgilerini kaydet
     localStorage.setItem('u_name', n);
-    localStorage.setItem('u_phone', p);
 
-    // Mesaj Formatı
     let msg = `*${currentShop.name.toUpperCase()}*\n`;
     msg += isTable ? `🔔 *MASADAN SİPARİŞ*\n` : `🛵 *ADRESE TESLİMAT*\n`;
     msg += `--------------------------\n`;
@@ -184,7 +185,6 @@ window.sendWhatsApp = function() {
     msg += `--------------------------\n`;
     msg += `*TOPLAM:* ${totalPrice} TL\n\n`;
     msg += `*Müşteri:* ${n}\n`;
-    msg += `*Telefon:* ${p}\n`;
     msg += `${locationInfo}\n`;
     if(nt) msg += `*Not:* ${nt}`;
     
