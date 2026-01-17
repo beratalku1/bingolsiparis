@@ -60,3 +60,16 @@ body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
     z-index: 1000;
     border-radius: 20px 20px 0 0;
 }
+
+#repeat-order-container {
+    padding: 10px 0;
+}
+#repeat-order-container button {
+    border: 2px dashed #d35400 !important;
+    background-color: #fff9f5 !important;
+    color: #d35400 !important;
+    font-weight: 600;
+    display: block;
+    width: 100%;
+}
+
