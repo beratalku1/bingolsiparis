@@ -15,9 +15,7 @@ const SHOPS = {
 let currentShop = null;
 let cart = [];
 
-// Masaüstünde tıklamayı garantiye alan ana fonksiyon
 window.openShop = function(shopKey) {
-    console.log("Dükkan açılıyor:", shopKey); // Hata ayıklama için
     currentShop = SHOPS[shopKey];
     if (!currentShop) return;
 
@@ -27,9 +25,33 @@ window.openShop = function(shopKey) {
     document.getElementById('home-screen').style.display = 'none';
     document.getElementById('menu-screen').style.display = 'block';
     document.getElementById('active-shop-name').innerText = currentShop.name;
-    document.getElementById('menu-container').innerHTML = '<div class="text-center mt-5"><div class="spinner-border text-warning"></div><p>Menü yükleniyor...</p></div>';
     
+    // Son sipariş butonu kontrolü
+    checkLastOrder();
+
     loadMenu(currentShop.url);
+};
+
+function checkLastOrder() {
+    const lastOrder = localStorage.getItem(`last_order_${currentShop.name}`);
+    const repeatBtn = document.getElementById('repeat-order-container');
+    if (lastOrder) {
+        repeatBtn.innerHTML = `<button class="btn btn-outline-secondary w-100 mb-3 small" onclick="repeatLastOrder()">
+            🔄 Son Siparişi Tekrarla (${JSON.parse(lastOrder).total} TL)
+        </button>`;
+        repeatBtn.style.display = 'block';
+    } else {
+        repeatBtn.style.display = 'none';
+    }
+}
+
+window.repeatLastOrder = function() {
+    const lastOrder = JSON.parse(localStorage.getItem(`last_order_${currentShop.name}`));
+    if (lastOrder && lastOrder.items) {
+        cart = lastOrder.items;
+        updateCart();
+        showOrderForm(); // Direkt formu aç
+    }
 };
 
 window.goHome = function() {
@@ -43,7 +65,7 @@ async function loadMenu(url) {
         const csv = await response.text();
         parseCSV(csv);
     } catch (e) {
-        document.getElementById('menu-container').innerHTML = "Hata: Veri çekilemedi. Lütfen sayfayı yenileyin.";
+        document.getElementById('menu-container').innerHTML = "Hata: Veri çekilemedi.";
     }
 }
 
@@ -51,21 +73,16 @@ function parseCSV(csv) {
     const rows = csv.split(/\r?\n/);
     let html = '';
     let currentCat = '';
-
     for (let i = 1; i < rows.length; i++) {
         let row = rows[i].trim();
         if (!row) continue;
-
         const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
         const cols = row.split(regex).map(c => c.replace(/^"|"$/g, '').trim());
-        
         if (cols.length < 3) continue;
-
         if (cols[0] !== currentCat) {
             currentCat = cols[0];
             html += `<h4 class="category-header">${currentCat}</h4>`;
         }
-
         html += `
             <div class="product-card d-flex justify-content-between align-items-center">
                 <div style="flex:1">
@@ -94,9 +111,7 @@ window.showOrderForm = function() {
     document.getElementById('cust-name').value = localStorage.getItem('u_name') || '';
     document.getElementById('cust-phone').value = localStorage.getItem('u_phone') || '';
     document.getElementById('cust-address').value = localStorage.getItem('u_address') || '';
-    
-    var myModal = new bootstrap.Modal(document.getElementById('orderModal'));
-    myModal.show();
+    new bootstrap.Modal(document.getElementById('orderModal')).show();
 };
 
 window.sendWhatsApp = function() {
@@ -107,13 +122,22 @@ window.sendWhatsApp = function() {
 
     if(!n || !a || !p) return alert("Lütfen tüm alanları doldurun!");
 
+    const totalPrice = document.getElementById('total-price').innerText;
+
+    // SON SİPARİŞİ KAYDET (Kritik Nokta)
+    const orderData = {
+        items: cart,
+        total: totalPrice
+    };
+    localStorage.setItem(`last_order_${currentShop.name}`, JSON.stringify(orderData));
+
     localStorage.setItem('u_name', n);
     localStorage.setItem('u_phone', p);
     localStorage.setItem('u_address', a);
 
     let msg = `*${currentShop.name.toUpperCase()} - YENİ SİPARİŞ*\n`;
     cart.forEach(i => msg += `• ${i.name} - ${i.price} TL\n`);
-    msg += `\n*TOPLAM:* ${document.getElementById('total-price').innerText} TL\n*Müşteri:* ${n}\n*Adres:* ${a}\n*Not:* ${nt}`;
+    msg += `\n*TOPLAM:* ${totalPrice} TL\n*Müşteri:* ${n}\n*Adres:* ${a}\n*Not:* ${nt}`;
     
     window.open(`https://wa.me/${currentShop.number}?text=${encodeURIComponent(msg)}`, '_blank');
 };
