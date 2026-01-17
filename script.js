@@ -1,3 +1,4 @@
+// DÜKKAN YAPILANDIRMALARI
 const SHOPS = {
     doner: {
         name: "Bingöllü Döner",
@@ -14,6 +15,17 @@ const SHOPS = {
 let currentShop = null;
 let cart = [];
 
+// SİPARİŞ TİPİ GEÇİŞİ (Masa / Adres)
+window.toggleOrderInput = function(type) {
+    if (type === 'table') {
+        document.getElementById('address-input-area').style.display = 'none';
+        document.getElementById('table-input-area').style.display = 'block';
+    } else {
+        document.getElementById('address-input-area').style.display = 'block';
+        document.getElementById('table-input-area').style.display = 'none';
+    }
+};
+
 window.openShop = function(shopKey) {
     currentShop = SHOPS[shopKey];
     cart = [];
@@ -29,7 +41,6 @@ window.openShop = function(shopKey) {
     
     if (lastData) {
         const parsed = JSON.parse(lastData);
-        // Ürün isimlerini birleştir
         const itemNames = parsed.items.map(i => i.name).join(", ");
         container.innerHTML = `
             <button class="btn btn-light mb-3 text-start w-100 p-3" onclick="repeatLastOrder('${shopKey}')">
@@ -100,7 +111,6 @@ window.addToCart = function(n, p) {
     updateCart();
 };
 
-// YENİ: SEPETTEN SİLME FONKSİYONU
 window.removeFromCart = function(index) {
     cart.splice(index, 1);
     updateCart();
@@ -110,7 +120,6 @@ function updateCart() {
     const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
     const cartList = document.getElementById('cart-items-list');
     
-    // Sepet listesini temizle ve yeniden oluştur
     cartList.innerHTML = '';
     cart.forEach((item, index) => {
         cartList.innerHTML += `
@@ -128,30 +137,56 @@ window.showOrderForm = function() {
     document.getElementById('cust-name').value = localStorage.getItem('u_name') || '';
     document.getElementById('cust-phone').value = localStorage.getItem('u_phone') || '';
     document.getElementById('cust-address').value = localStorage.getItem('u_address') || '';
+    
+    // Formu her açılışta varsayılan olarak "Adres" tipine getir
+    document.getElementById('typeAddress').checked = true;
+    toggleOrderInput('address');
+    
     new bootstrap.Modal(document.getElementById('orderModal')).show();
 };
 
 window.sendWhatsApp = function() {
-    const n = document.getElementById('cust-name').value, 
-          p = document.getElementById('cust-phone').value, 
-          a = document.getElementById('cust-address').value, 
-          nt = document.getElementById('cust-note').value;
+    const n = document.getElementById('cust-name').value;
+    const p = document.getElementById('cust-phone').value;
+    const nt = document.getElementById('cust-note').value;
+    const isTable = document.getElementById('typeTable').checked;
 
-    if(!n || !a || !p) return alert("Eksikleri doldurun!");
+    if(!n || !p) return alert("Lütfen ad ve telefon bilgilerini doldurun!");
+
+    let locationInfo = "";
+    if(isTable) {
+        const tableNo = document.getElementById('cust-table').value;
+        if(!tableNo) return alert("Lütfen masa numarasını girin!");
+        locationInfo = `📍 *MASA NO:* ${tableNo}`;
+    } else {
+        const address = document.getElementById('cust-address').value;
+        if(!address) return alert("Lütfen teslimat adresini girin!");
+        locationInfo = `🏠 *ADRES:* ${address}`;
+        localStorage.setItem('u_address', address);
+    }
 
     const totalPrice = document.getElementById('total-price').innerText;
-
     const shopKey = currentShop.name === "Bingöllü Döner" ? 'doner' : 'tatli';
+    
+    // Son siparişi kaydet
     const orderData = { items: cart, total: totalPrice };
     localStorage.setItem('last_order_' + shopKey, JSON.stringify(orderData));
 
+    // Müşteri bilgilerini kaydet
     localStorage.setItem('u_name', n);
     localStorage.setItem('u_phone', p);
-    localStorage.setItem('u_address', a);
 
-    let msg = `*${currentShop.name.toUpperCase()} - YENİ SİPARİŞ*\n`;
+    // Mesaj Formatı
+    let msg = `*${currentShop.name.toUpperCase()}*\n`;
+    msg += isTable ? `🔔 *MASADAN SİPARİŞ*\n` : `🛵 *ADRESE TESLİMAT*\n`;
+    msg += `--------------------------\n`;
     cart.forEach(i => msg += `• ${i.name} - ${i.price} TL\n`);
-    msg += `\n*TOPLAM:* ${totalPrice} TL\n*Müşteri:* ${n}\n*Adres:* ${a}\n*Not:* ${nt}`;
+    msg += `--------------------------\n`;
+    msg += `*TOPLAM:* ${totalPrice} TL\n\n`;
+    msg += `*Müşteri:* ${n}\n`;
+    msg += `*Telefon:* ${p}\n`;
+    msg += `${locationInfo}\n`;
+    if(nt) msg += `*Not:* ${nt}`;
     
     window.open(`https://wa.me/${currentShop.number}?text=${encodeURIComponent(msg)}`, '_blank');
 };
