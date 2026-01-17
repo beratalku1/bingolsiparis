@@ -74,17 +74,33 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Teslimat Bilgileri</h5>
+                <h5 class="modal-title">Sipariş Detayları</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <div class="btn-group w-100 mb-3" role="group">
+                    <input type="radio" class="btn-check" name="orderType" id="typeAddress" checked onclick="toggleOrderInput('address')">
+                    <label class="btn btn-outline-warning" for="typeAddress">Adrese Gelsin</label>
+
+                    <input type="radio" class="btn-check" name="orderType" id="typeTable" onclick="toggleOrderInput('table')">
+                    <label class="btn btn-outline-warning" for="typeTable">Masadayım</label>
+                </div>
+
                 <input type="text" id="cust-name" class="form-control mb-3" placeholder="Adınız Soyadınız">
                 <input type="tel" id="cust-phone" class="form-control mb-3" placeholder="Telefon Numaranız">
-                <textarea id="cust-address" class="form-control mb-3" placeholder="Açık Adresiniz"></textarea>
+
+                <div id="address-input-area">
+                    <textarea id="cust-address" class="form-control mb-3" placeholder="Açık Adresiniz"></textarea>
+                </div>
+
+                <div id="table-input-area" style="display:none;">
+                    <input type="number" id="cust-table" class="form-control mb-3" placeholder="Masa Numaranız">
+                </div>
+
                 <textarea id="cust-note" class="form-control" placeholder="Sipariş Notu (Opsiyonel)"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="sendWhatsApp()">WhatsApp'tan Sipariş Ver</button>
+                <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="sendWhatsApp()">Siparişi WhatsApp'tan Gönder</button>
             </div>
         </div>
     </div>
@@ -94,5 +110,6 @@
 <script src="script.js"></script>
 </body>
 </html>
+
 
 
