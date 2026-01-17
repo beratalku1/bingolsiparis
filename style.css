@@ -20,7 +20,7 @@ body {
 .navbar { 
     background-color: #d35400; /* Ana turuncu */
     /* Bal peteği deseni: Şeffaf altıgenlerden oluşan bir görsel kaplama */
-    background-image: url('https://www.transparenttextures.com/patterns/honey-comb.png');
+    background-image: url('https://www.transparenttextures.com/patterns/light-honeycomb.png');
     background-repeat: repeat;
     position: relative;
     border-bottom: 4px solid #f39c12;
@@ -252,5 +252,6 @@ body {
         animation-duration: 15s; /* Daha hızlı hareket */
     }
 }
+
 
 
