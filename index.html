@@ -10,24 +10,31 @@
 <body>
 
 <div class="bingol-bg-elements">
-    <div class="bee-1">🐝</div>
-    <div class="bee-2">🐝</div>
-    <div class="bee-3">🐝</div>
+    <div class="bug bee-pos-1">
+        <div class="bee1"><div class="eye"></div></div>
+        <div class="bee2"><div class="wing"></div><div class="wing2"></div></div>
+    </div>
+    <div class="bug bee-pos-2">
+        <div class="bee1"><div class="eye"></div></div>
+        <div class="bee2"><div class="wing"></div><div class="wing2"></div></div>
+    </div>
+    <div class="bug bee-pos-3">
+        <div class="bee1"><div class="eye"></div></div>
+        <div class="bee2"><div class="wing"></div><div class="wing2"></div></div>
+    </div>
     <div class="eagle-1">🦅</div>
     <div class="eagle-2">🦅</div>
-    <div class="honeycomb" style="top:50%; left:50%; font-size: 8rem; opacity:0.03;">🍯</div>
+    <div class="honey-icon">🍯</div>
 </div>
 
 <div id="home-screen">
-   <nav class="navbar mb-4 shadow-lg">
+    <nav class="navbar mb-4 shadow-lg">
         <div class="container text-center">
-            <span class="navbar-brand mb-0 h1 w-100">
-                🦅 BİNGÖL SİPARİŞLERİM 🐝
-            </span>
+            <span class="navbar-brand mb-0 h1 w-100">BİNGÖL SİPARİŞLERİM</span>
         </div>
     </nav>
     <div class="container">
-        <h5 class="mb-3 text-secondary">Restoran Seçin</h5>
+        <h5 class="mb-3 text-secondary" style="position:relative; z-index:2;">Restoran Seçin</h5>
         <div class="row g-3">
             <div class="col-12">
                 <div class="shop-card p-3 d-flex align-items-center" onclick="openShop('doner')">
@@ -58,9 +65,8 @@
             <span class="navbar-brand mb-0 h1" id="active-shop-name">Dükkan Adı</span>
         </div>
     </nav>
-
     <div class="container mb-5 pb-5">
-        <div id="repeat-order-container" class="container mt-3" style="display:none;"></div>
+        <div id="repeat-order-container" class="container mt-3" style="display:none; position:relative; z-index:10;"></div>
         <div id="menu-container">
             <div class="text-center mt-5">
                 <div class="spinner-border text-warning" role="status"></div>
@@ -68,11 +74,9 @@
             </div>
         </div>
     </div>
-
     <div id="cart-footer" class="cart-footer">
         <div class="container">
             <div id="cart-items-list" class="mb-3" style="max-height: 150px; overflow-y: auto;"></div>
-            
             <div class="d-flex justify-content-between align-items-center">
                 <div><strong>Toplam: <span id="total-price">0</span> TL</strong></div>
                 <button class="btn btn-warning fw-bold" onclick="showOrderForm()">Siparişi Tamamla</button>
@@ -92,26 +96,21 @@
                 <div class="btn-group w-100 mb-3" role="group">
                     <input type="radio" class="btn-check" name="orderType" id="typeAddress" checked onclick="toggleOrderInput('address')">
                     <label class="btn btn-outline-warning" for="typeAddress">Adrese Gelsin</label>
-
                     <input type="radio" class="btn-check" name="orderType" id="typeTable" onclick="toggleOrderInput('table')">
                     <label class="btn btn-outline-warning" for="typeTable">Masadayım</label>
                 </div>
-
                 <input type="text" id="cust-name" class="form-control mb-3" placeholder="Adınız Soyadınız">
                 <input type="tel" id="cust-phone" class="form-control mb-3" placeholder="Telefon Numaranız">
-
                 <div id="address-input-area">
                     <textarea id="cust-address" class="form-control mb-3" placeholder="Açık Adresiniz"></textarea>
                 </div>
-
                 <div id="table-input-area" style="display:none;">
                     <input type="number" id="cust-table" class="form-control mb-3" placeholder="Masa Numaranız">
                 </div>
-
                 <textarea id="cust-note" class="form-control" placeholder="Sipariş Notu (Opsiyonel)"></textarea>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="sendWhatsApp()">Siparişi WhatsApp'tan Gönder</button>
+                <button type="button" class="btn btn-success w-100 py-2 fw-bold" onclick="sendWhatsApp()">WhatsApp'tan Sipariş Ver</button>
             </div>
         </div>
     </div>
@@ -121,5 +120,3 @@
 <script src="script.js"></script>
 </body>
 </html>
-
-
