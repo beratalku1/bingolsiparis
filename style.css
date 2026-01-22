@@ -1,257 +1,110 @@
+/* --- GENEL AYARLAR --- */
 body { 
     background-color: #f8f9fa; 
     font-family: 'Segoe UI', sans-serif; 
-    overflow-x: hidden; /* Yatay kaydırmayı engelle */
-    position: relative; /* Arkaplan animasyonu için gerekli */
+    overflow-x: hidden;
+    position: relative;
 }
 
-/* Genel renk paleti */
 :root {
-    --primary-color: #d35400; /* Koyu turuncu / Mercan rengi */
-    --secondary-color: #f39c12; /* Parlak turuncu / Bal rengi */
-    --background-light: #fff5eb; /* Açık krem / Bal tonu */
-    --text-dark: #2c3e50; /* Koyu gri */
-    --text-muted: #7f8c8d; /* Orta gri */
+    --primary-color: #d35400;
+    --honey-yellow: #f39c12;
+    --bee-body: #fbc177;
+    --bee-black: #474e56;
+    --bee-wing: #fde8cb;
 }
 
-/* Navbar ve genel öğeler için yeni renkler */
-/* Bal Peteği Navbar Tasarımı */
-/* Bal Peteği Navbar - Yeni ve Gerçekçi Tasarım */
+/* --- BAL PETEĞİ NAVBAR --- */
 .navbar { 
-    background-color: #d35400; /* Ana turuncu */
-    /* Bal peteği deseni: Şeffaf altıgenlerden oluşan bir görsel kaplama */
+    background-color: var(--primary-color);
     background-image: url('https://www.transparenttextures.com/patterns/light-honeycomb.png');
     background-repeat: repeat;
-    position: relative;
-    border-bottom: 4px solid #f39c12;
-    padding: 20px 0; /* Barı biraz daha genişlettik */
+    border-bottom: 4px solid var(--honey-yellow);
+    padding: 20px 0;
 }
-
-/* Yazının arkasına hafif bir gölge ekleyerek petek üzerinde parlamasını sağlayalım */
 .navbar-brand { 
     color: white !important; 
     font-weight: 800; 
     letter-spacing: 2px;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.5); 
-    z-index: 5;
-    position: relative;
 }
 
-/* Arka plandaki arı ve kartalları daha belirgin ama göz yormayacak hale getirelim */
-.bingol-bg-elements div {
+/* --- ARİ ANİMASYONU (KODLA ÇİZİLEN) --- */
+.bug {
     position: fixed;
-    pointer-events: none;
+    width: 60px;
+    height: 90px;
     z-index: -1;
-    filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.1)); /* Simgelere hafif derinlik */
+    opacity: 0.25;
+    pointer-events: none;
 }
-
-/* Arı ve Kartal sınıfları (Öncekiyle aynı, sayıları artırılmış) */
-.bee-1 { top: 15%; left: 10%; font-size: 3rem; animation: float 12s infinite ease-in-out; opacity: 0.2; }
-.bee-2 { top: 45%; right: 8%; font-size: 2.5rem; animation: float 15s infinite ease-in-out; opacity: 0.15; }
-.bee-3 { bottom: 25%; left: 12%; font-size: 2rem; animation: float 18s infinite ease-in-out; opacity: 0.2; }
-.eagle-1 { top: 10%; right: 20%; font-size: 5rem; animation: float 25s infinite ease-in-out; opacity: 0.1; }
-.eagle-2 { bottom: 15%; right: 5%; font-size: 4rem; animation: float 20s infinite ease-in-out; opacity: 0.1; }
-
-@keyframes float {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    50% { transform: translate(20px, -30px) rotate(5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
+.bee1 {
+    width: 40px; height: 40px;
+    background: var(--honey-yellow);
+    border-radius: 50% 50% 0 0;
+    margin: 0 auto; position: relative;
+    border: 3px solid var(--bee-black);
 }
-
-/* Dükkan Kartları - Web'de Tıklamayı Garantiye Alan Ayarlar */
-.shop-card { 
-    background: white; 
-    border-radius: 15px; 
-    border: 1px solid #eee; 
-    cursor: pointer !important; 
-    transition: 0.2s; 
+.eye {
+    width: 6px; height: 6px; background: var(--bee-black);
+    border-radius: 50%; position: absolute;
+    top: 12px; left: 8px; box-shadow: 16px 0 0 var(--bee-black);
+}
+.bee2 {
+    width: 40px; height: 50px;
+    background: var(--honey-yellow);
+    margin: 0 auto; border: 3px solid var(--bee-black);
+    border-top: none;
+    background-image: linear-gradient(var(--bee-black) 20%, transparent 20%, transparent 40%, var(--bee-black) 40%, var(--bee-black) 60%, transparent 60%, transparent 80%, var(--bee-black) 80%);
+    border-radius: 0 0 50% 50%;
     position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* Hafif gölge */
 }
-.shop-card:hover { 
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1); 
-    background-color: var(--background-light); /* Hover'da bal tonu */
+.wing, .wing2 {
+    position: absolute; top: -5px;
+    width: 35px; height: 45px;
+    background: var(--bee-wing);
+    border-radius: 50%; z-index: -1;
+    border: 2px solid var(--bee-black);
 }
-.shop-icon { 
-    font-size: 2rem; 
-    background: var(--background-light); 
-    width: 60px; 
-    height: 60px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border-radius: 12px; 
-    pointer-events: none; 
-    color: var(--primary-color); /* İkon rengi */
+.wing { left: -25px; transform-origin: right bottom; animation: fly-l 0.1s infinite alternate; }
+.wing2 { right: -25px; transform-origin: left bottom; animation: fly-r 0.1s infinite alternate; }
+
+@keyframes fly-l { 100% { transform: rotate(25deg); } }
+@keyframes fly-r { 100% { transform: rotate(-25deg); } }
+
+/* Arıların Konumları ve Süzülmeleri */
+.bee-pos-1 { top: 15%; left: 5%; animation: float-bee 18s infinite ease-in-out; }
+.bee-pos-2 { top: 40%; right: 10%; animation: float-bee 22s infinite ease-in-out; animation-delay: 2s; }
+.bee-pos-3 { bottom: 20%; left: 15%; animation: float-bee 20s infinite ease-in-out; animation-delay: 5s; }
+
+@keyframes float-bee {
+    0% { transform: translate(0,0) rotate(0deg); }
+    50% { transform: translate(40px, -40px) rotate(8deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
 }
 
-/* Menü Tasarımı */
-.category-header { 
-    background: #fff; 
-    padding: 12px; 
-    border-radius: 8px; 
-    margin-top: 20px; 
-    border-left: 6px solid var(--primary-color); /* Ana renk ile kategori vurgusu */
-    font-weight: bold;
-    color: var(--text-dark);
-}
-.product-card { 
-    background: #fff; 
-    border-radius: 12px; 
-    padding: 16px; 
-    margin-bottom: 10px; 
-    border: 1px solid #eee; 
-    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-}
-.price-tag { color: var(--primary-color); font-weight: bold; font-size: 1.1em; }
-.btn-add { 
-    background-color: var(--primary-color); /* Ana renk ile ekle butonu */
-    color: white; 
-    border: none; 
-    padding: 5px 20px; 
-    border-radius: 20px; 
-    font-weight: bold; 
-    cursor: pointer; 
-    transition: background-color 0.2s;
-}
-.btn-add:hover { background-color: var(--secondary-color); }
+/* --- DİĞER ELEMENTLER --- */
+.eagle-1, .eagle-2, .honey-icon { position: fixed; z-index: -1; opacity: 0.1; pointer-events: none; }
+.eagle-1 { top: 5%; right: 20%; font-size: 4rem; }
+.eagle-2 { bottom: 10%; right: 5%; font-size: 3rem; }
+.honey-icon { top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 8rem; opacity: 0.03; }
 
-.cart-footer { 
-    position: fixed; 
-    bottom: 0; left: 0; right: 0; 
-    background: white; 
-    padding: 20px; 
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.1); 
-    display: none; 
-    z-index: 1000;
-    border-radius: 20px 20px 0 0;
+/* --- KART TASARIMLARI --- */
+.shop-card { 
+    background: white; border-radius: 15px; border: 1px solid #eee; 
+    cursor: pointer; transition: 0.2s; position: relative; z-index: 5;
 }
+.shop-card:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.1); background-color: #fff5eb; }
+.shop-icon { font-size: 2rem; background: #fff5eb; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
 
-/* Sepet Listesi Tasarımı */
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
-    color: var(--text-dark);
-}
-.btn-remove {
-    color: #e74c3c;
-    cursor: pointer;
-    font-weight: bold;
-    margin-left: 10px;
-    border: none;
-    background: none;
-    font-size: 1.2em;
-    padding: 0 5px;
-}
-.last-order-detail {
-    font-size: 0.8rem;
-    display: block;
-    color: var(--text-muted);
-    margin-top: 5px;
-}
+.category-header { background: #fff; padding: 12px; border-radius: 8px; margin-top: 20px; border-left: 6px solid var(--primary-color); font-weight: bold; }
+.product-card { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 10px; border: 1px solid #eee; }
+.price-tag { color: var(--primary-color); font-weight: bold; }
+.btn-add { background-color: var(--primary-color); color: white; border: none; padding: 5px 20px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
-/* Son Sipariş Butonu Tasarımı */
-#repeat-order-container button {
-    border: 2px dashed var(--primary-color) !important;
-    background-color: var(--background-light) !important;
-    color: var(--primary-color) !important;
-    font-weight: 600;
-    display: block;
-    width: 100%;
-    transition: background-color 0.3s, color 0.3s;
-    border-radius: 12px;
-}
+.cart-footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; box-shadow: 0 -4px 15px rgba(0,0,0,0.1); display: none; z-index: 1000; border-radius: 20px 20px 0 0; }
+.cart-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed #eee; }
+.btn-remove { color: #e74c3c; cursor: pointer; font-weight: bold; border: none; background: none; }
 
-#repeat-order-container button:hover {
-    background-color: var(--primary-color) !important;
-    color: white !important;
-}
-
-/* Modal Butonları */
-.modal-footer .btn-success {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-}
-.modal-footer .btn-success:hover {
-    background-color: var(--secondary-color);
-    border-color: var(--secondary-color);
-}
-.modal-body .btn-outline-warning { /* Sipariş tipi butonları */
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-}
-.modal-body .btn-check:checked + .btn-outline-warning {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-}
-
-/* Bingöl Teması - Arkaplan Animasyonu */
-.bingol-bg-elements {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    pointer-events: none; /* Tıklamayı engellemesin */
-    overflow: hidden;
-    z-index: 0; /* İçeriklerin arkasında kalsın */
-}
-
-.bingol-bg-elements div {
-    position: absolute;
-    opacity: 0.1; /* Hafif transparan */
-    animation: float 20s infinite ease-in-out;
-}
-
-.bingol-bg-elements .bee {
-    font-size: 3em;
-    top: 10%;
-    left: 5%;
-    animation-delay: 0s;
-    animation-duration: 18s;
-}
-
-.bingol-bg-elements .eagle {
-    font-size: 4em;
-    top: 70%;
-    right: 10%;
-    animation-delay: 5s;
-    animation-duration: 22s;
-}
-
-.bingol-bg-elements .honeycomb {
-    font-size: 5em;
-    bottom: -10%;
-    left: 20%;
-    animation-delay: 10s;
-    animation-duration: 25s;
-    opacity: 0.05;
-}
-
-@keyframes float {
-    0% { transform: translate(0, 0) rotate(0deg); }
-    25% { transform: translate(10px, -20px) rotate(5deg); }
-    50% { transform: translate(0, -40px) rotate(0deg); }
-    75% { transform: translate(-10px, -20px) rotate(-5deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* Mobil için animasyonları daha az yoğun yapabiliriz */
-@media (max-width: 768px) {
-    .bingol-bg-elements div {
-        font-size: 2em; /* Daha küçük emojiler */
-        opacity: 0.05; /* Daha da transparan */
-        animation-duration: 15s; /* Daha hızlı hareket */
-    }
-}
-
-
-
+#repeat-order-container button { border: 2px dashed var(--primary-color) !important; background-color: #fff9f5 !important; color: var(--primary-color) !important; font-weight: 600; width: 100%; border-radius: 12px; padding: 15px; }
+.last-order-detail { font-size: 0.8rem; color: #7f8c8d; display: block; margin-top: 5px; }
