@@ -14,35 +14,32 @@ const SHOPS = {
 let currentShop = null;
 let cart = [];
 
-// URL PARAMETRESİ İLE OTOMATİK DÜKKAN AÇMA
-window.addEventListener('DOMContentLoaded', () => {
+// --- KRİTİK DÜZELTME: URL KONTROLÜ ---
+function checkUrlAndOpenShop() {
     const params = new URLSearchParams(window.location.search);
-    const s = params.get('s');
-    if (s && SHOPS[s]) openShop(s);
-});
-
-window.toggleOrderInput = function(type) {
-    const addressArea = document.getElementById('address-input-area');
-    const tableArea = document.getElementById('table-input-area');
-    const phoneInput = document.getElementById('cust-phone');
-    if (type === 'table') {
-        addressArea.style.display = 'none';
-        phoneInput.style.display = 'none';
-        tableArea.style.display = 'block';
-    } else {
-        addressArea.style.display = 'block';
-        phoneInput.style.display = 'block';
-        tableArea.style.display = 'none';
+    const shopId = params.get('s');
+    
+    if (shopId && SHOPS[shopId]) {
+        console.log("URL'den dükkan algılandı:", shopId);
+        openShop(shopId);
     }
-};
+}
+
+// Sayfa tamamen yüklendiğinde kontrol et
+window.addEventListener('load', checkUrlAndOpenShop);
 
 window.openShop = function(shopKey) {
     currentShop = SHOPS[shopKey];
+    if (!currentShop) return;
+
     cart = [];
     updateCart();
+    
     document.getElementById('home-screen').style.display = 'none';
     document.getElementById('menu-screen').style.display = 'block';
     document.getElementById('active-shop-name').innerText = currentShop.name;
+    
+    // Son sipariş kontrolü
     const lastData = localStorage.getItem('last_order_' + shopKey);
     const container = document.getElementById('repeat-order-container');
     if (lastData) {
@@ -50,27 +47,31 @@ window.openShop = function(shopKey) {
         const itemNames = parsed.items.map(i => i.name).join(", ");
         container.innerHTML = `<button class="btn btn-light mb-3 text-start w-100 p-3" onclick="repeatLastOrder('${shopKey}')"><strong>🔄 Son Siparişi Tekrarla (${parsed.total} TL)</strong><span class="last-order-detail">${itemNames}</span></button>`;
         container.style.display = 'block';
-    } else { container.style.display = 'none'; }
+    } else {
+        container.style.display = 'none';
+    }
+
     loadMenu(currentShop.url);
 };
 
-window.repeatLastOrder = function(shopKey) {
-    const lastData = JSON.parse(localStorage.getItem('last_order_' + shopKey));
-    if (lastData) { cart = lastData.items; updateCart(); showOrderForm(); }
-};
+// ... (Geri kalan tüm fonksiyonlar: loadMenu, parseCSV, addToCart, updateCart vb. aşağıda devam etmeli)
 
 window.goHome = function() {
-    window.history.pushState({}, '', window.location.pathname); // URL'yi temizle
+    // Ana sayfaya dönerken URL'deki ?s=doner kısmını temizle ki kafa karışmasın
+    window.history.pushState({}, '', window.location.pathname);
     document.getElementById('home-screen').style.display = 'block';
     document.getElementById('menu-screen').style.display = 'none';
 };
 
+// DİĞER FONKSİYONLARIN AYNI KALSIN (removeFromCart, updateCart, sendWhatsApp vb.)
 async function loadMenu(url) {
     try {
         const response = await fetch(url + '&cb=' + Date.now());
         const csv = await response.text();
         parseCSV(csv);
-    } catch (e) { document.getElementById('menu-container').innerHTML = "Menü yüklenemedi."; }
+    } catch (e) {
+        document.getElementById('menu-container').innerHTML = "Menü yüklenemedi.";
+    }
 }
 
 function parseCSV(csv) {
@@ -106,6 +107,17 @@ function updateCart() {
     document.getElementById('cart-footer').style.display = total > 0 ? 'block' : 'none';
 }
 
+window.toggleOrderInput = function(type) {
+    const addressArea = document.getElementById('address-input-area');
+    const tableArea = document.getElementById('table-input-area');
+    const phoneInput = document.getElementById('cust-phone');
+    if (type === 'table') {
+        addressArea.style.display = 'none'; phoneInput.style.display = 'none'; tableArea.style.display = 'block';
+    } else {
+        addressArea.style.display = 'block'; phoneInput.style.display = 'block'; tableArea.style.display = 'none';
+    }
+};
+
 window.showOrderForm = function() {
     document.getElementById('cust-name').value = localStorage.getItem('u_name') || '';
     document.getElementById('cust-phone').value = localStorage.getItem('u_phone') || '';
@@ -117,7 +129,7 @@ window.showOrderForm = function() {
 
 window.sendWhatsApp = function() {
     const n = document.getElementById('cust-name').value, p = document.getElementById('cust-phone').value, nt = document.getElementById('cust-note').value, isTable = document.getElementById('typeTable').checked;
-    if(!n) return alert("Lütfen adınızı girin!");
+    if(!n) return alert("Adınızı girin!");
     let loc = "";
     if(isTable) {
         const t = document.getElementById('cust-table').value;
@@ -127,8 +139,7 @@ window.sendWhatsApp = function() {
         const a = document.getElementById('cust-address').value;
         if(!p || !a) return alert("Telefon ve adres girin!");
         loc = `🏠 *ADRES:* ${a}\n📞 *TEL:* ${p}`;
-        localStorage.setItem('u_address', a);
-        localStorage.setItem('u_phone', p);
+        localStorage.setItem('u_address', a); localStorage.setItem('u_phone', p);
     }
     const tp = document.getElementById('total-price').innerText;
     const sk = currentShop.name === "Bingöllü Döner" ? 'doner' : 'tatli';
